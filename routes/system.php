@@ -9,10 +9,9 @@ class system extends Base
   }
   function GetSettings(){
     $data = [
-      'blog'    => $this->db->limit(10)->get('blog')->fetchAll(),//,['expire_at <'=>'#NOW()']
+      'blog'    => $this->db->limit(10)->get('blog',['expire_at <'=>'#NOW()'])->fetchAll(),//,
       'rooms' => [],
       'users' => [],
-      'holidays'=>[],
     ];
 
     foreach($this->GetRooms()->data as $row){
@@ -24,7 +23,7 @@ class system extends Base
     $data['rooms'] = array_values($data['rooms']);
 
     foreach($this->db->get('day_off')->fetchAll() as $day){
-      @$data['holidays'][$day->room_id][$day->day]=$day;
+      @$data['rooms'][$day->room_id]->holidays[$day->day] = $day;
     }
 
     if( $this->me('role','dr') ){
@@ -34,7 +33,7 @@ class system extends Base
         $data['users'][$row->id] = $row;
       }  
     }
-    $data['users'] = array_values($data['users']);
+    $data['users'][$this->me('id')] = $this->me();
 
     return new R(200,$data);
   }
